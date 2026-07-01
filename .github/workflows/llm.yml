@@ -1,4 +1,4 @@
-name: Run Tiny LLM (Clean Output)
+name: Run Tiny LLM (Stable Clean)
 
 on:
   workflow_dispatch:
@@ -27,7 +27,7 @@ jobs:
         run: |
           wget -O model.gguf https://huggingface.co/bartowski/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/Qwen2.5-0.5B-Instruct-Q4_K_M.gguf
 
-      - name: Run model (clean output)
+      - name: Run model
         run: |
           ./llama.cpp/build/bin/llama-cli \
             -m model.gguf \
@@ -36,6 +36,4 @@ jobs:
             --temp 0.2 \
             --top-p 0.9 \
             --repeat-penalty 1.2 \
-            -q \
-            --no-display-prompt \
-            2>/dev/null
+            2>&1 | tail -n 200
