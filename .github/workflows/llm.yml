@@ -1,4 +1,4 @@
-name: Run Tiny LLM (Fixed)
+name: Run Tiny LLM (Stable)
 
 on:
   workflow_dispatch:
@@ -23,9 +23,9 @@ jobs:
           cmake -B build
           cmake --build build -j$(nproc)
 
-      - name: Download model
+      - name: Download model (Qwen2.5 0.5B Instruct)
         run: |
-          wget -O model.gguf https://huggingface.co/QuantLLM/SmolLM2-135M-GGUF/resolve/main/SmolLM2-135M.Q4_K_M.gguf
+          wget -O model.gguf https://huggingface.co/bartowski/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/Qwen2.5-0.5B-Instruct-Q4_K_M.gguf
 
       - name: Run model
         run: |
@@ -34,7 +34,7 @@ jobs:
           ./llama.cpp/build/bin/llama-cli \
             -m model.gguf \
             -p "$PROMPT" \
-            -n 32 \
+            -n 64 \
             --temp 0.7 \
             --top-p 0.9 \
             --repeat-penalty 1.2 \
