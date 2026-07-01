@@ -29,13 +29,11 @@ jobs:
 
       - name: Run model
         run: |
+          PROMPT="<|im_start|>user\nHello\n<|im_end|>\n<|im_start|>assistant\n"
+
           ./llama.cpp/build/bin/llama-cli \
             -m model.gguf \
-            -p "<|im_start|>user
-Hello
-<|im_end|>
-<|im_start|>assistant
-" \
+            -p "$PROMPT" \
             -n 32 \
             --temp 0.7 \
             --top-p 0.9 \
