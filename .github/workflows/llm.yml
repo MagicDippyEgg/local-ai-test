@@ -27,13 +27,17 @@ jobs:
         run: |
           wget -O model.gguf https://huggingface.co/QuantLLM/SmolLM2-135M-GGUF/resolve/main/SmolLM2-135M.Q4_K_M.gguf
 
-      - name: Run model (safe output)
+      - name: Run model
         run: |
           ./llama.cpp/build/bin/llama-cli \
             -m model.gguf \
-            -p "<|im_start|>user\nHello\n<|im_end|>\n<|im_start|>assistant\n" \
+            -p "<|im_start|>user
+Hello
+<|im_end|>
+<|im_start|>assistant
+" \
             -n 32 \
             --temp 0.7 \
             --top-p 0.9 \
             --repeat-penalty 1.2 \
-            --log-disable 1
+            --log-disable
