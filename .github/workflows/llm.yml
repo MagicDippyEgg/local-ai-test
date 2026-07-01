@@ -1,4 +1,4 @@
-name: Run Tiny LLM
+name: Run Tiny LLM (Fixed)
 
 on:
   workflow_dispatch:
@@ -21,15 +21,19 @@ jobs:
         run: |
           cd llama.cpp
           cmake -B build
-          cmake --build build --config Release -j$(nproc)
+          cmake --build build -j$(nproc)
 
-      - name: Download SmolLM2 135M
+      - name: Download model
         run: |
           wget -O model.gguf https://huggingface.co/QuantLLM/SmolLM2-135M-GGUF/resolve/main/SmolLM2-135M.Q4_K_M.gguf
 
-      - name: Run the model
+      - name: Run model (safe output)
         run: |
           ./llama.cpp/build/bin/llama-cli \
             -m model.gguf \
-            -p "Hello" \
-            -n 64
+            -p "<|im_start|>user\nHello\n<|im_end|>\n<|im_start|>assistant\n" \
+            -n 32 \
+            --temp 0.7 \
+            --top-p 0.9 \
+            --repeat-penalty 1.2 \
+            --log-disable 1
