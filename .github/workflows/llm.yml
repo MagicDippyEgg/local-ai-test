@@ -1,0 +1,35 @@
+name: Run Tiny LLM
+
+on:
+  workflow_dispatch:
+
+jobs:
+  llm:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git build-essential cmake wget
+
+      - name: Clone llama.cpp
+        run: |
+          git clone https://github.com/ggml-org/llama.cpp.git
+
+      - name: Build llama.cpp
+        run: |
+          cd llama.cpp
+          cmake -B build
+          cmake --build build --config Release -j$(nproc)
+
+      - name: Download SmolLM2 135M
+        run: |
+          wget -O model.gguf https://huggingface.co/QuantLLM/SmolLM2-135M-GGUF/resolve/main/SmolLM2-135M.Q4_K_M.gguf
+
+      - name: Run the model
+        run: |
+          ./llama.cpp/build/bin/llama-cli \
+            -m model.gguf \
+            -p "Hello" \
+            -n 64
