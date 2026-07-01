@@ -1,4 +1,4 @@
-name: Run Tiny LLM (Fixed Properly)
+name: Run Tiny LLM (Actually Fixed)
 
 on:
   workflow_dispatch:
@@ -13,9 +13,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y git build-essential cmake wget
 
-      - name: Clone llama.cpp
+      - name: Clone llama.cpp (stable version)
         run: |
           git clone https://github.com/ggml-org/llama.cpp.git
+          cd llama.cpp
+          git checkout b4d5c7b || true
 
       - name: Build llama.cpp
         run: |
@@ -27,14 +29,15 @@ jobs:
         run: |
           wget -O model.gguf https://huggingface.co/bartowski/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/Qwen2.5-0.5B-Instruct-Q4_K_M.gguf
 
-      - name: Run model (correct chat mode)
+      - name: Run model (fixed chat template)
         run: |
           ./llama.cpp/build/bin/llama-cli \
             -m model.gguf \
-            -cnv \
             -p "Hello" \
-            -n 64 \
-            --temp 0.7 \
+            -cnv \
+            --chat-template qwen2 \
+            -n 32 \
+            --temp 0.3 \
             --top-p 0.9 \
             --repeat-penalty 1.2 \
-            --log-disable
+            --seed 1
