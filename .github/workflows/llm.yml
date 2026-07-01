@@ -1,4 +1,4 @@
-name: Run Tiny LLM (Stable)
+name: Run Tiny LLM (Fixed Properly)
 
 on:
   workflow_dispatch:
@@ -23,17 +23,16 @@ jobs:
           cmake -B build
           cmake --build build -j$(nproc)
 
-      - name: Download model (Qwen2.5 0.5B Instruct)
+      - name: Download model
         run: |
           wget -O model.gguf https://huggingface.co/bartowski/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/Qwen2.5-0.5B-Instruct-Q4_K_M.gguf
 
-      - name: Run model
+      - name: Run model (correct chat mode)
         run: |
-          PROMPT="<|im_start|>user\nHello\n<|im_end|>\n<|im_start|>assistant\n"
-
           ./llama.cpp/build/bin/llama-cli \
             -m model.gguf \
-            -p "$PROMPT" \
+            -cnv \
+            -p "Hello" \
             -n 64 \
             --temp 0.7 \
             --top-p 0.9 \
