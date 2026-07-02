@@ -1,4 +1,4 @@
-name: Run Tiny LLM (Cached Build)
+name: Run Tiny LLM (Fixed Cache)
 
 on:
   workflow_dispatch:
@@ -13,19 +13,17 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y git build-essential cmake wget
 
-      - name: Cache llama.cpp build
+      - name: Clone llama.cpp (always)
+        run: |
+          git clone https://github.com/ggml-org/llama.cpp.git
+
+      - name: Cache build folder
         uses: actions/cache@v4
         with:
           path: llama.cpp/build
           key: llama-build-v1
 
-      - name: Clone llama.cpp (if needed)
-        run: |
-          if [ ! -d llama.cpp ]; then
-            git clone https://github.com/ggml-org/llama.cpp.git
-          fi
-
-      - name: Build llama.cpp (only if missing)
+      - name: Build llama.cpp (only if needed)
         run: |
           cd llama.cpp
           cmake -B build
