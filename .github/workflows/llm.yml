@@ -1,4 +1,4 @@
-name: Run Tiny LLM
+name: Run Tiny LLM (Fast)
 
 on:
   workflow_dispatch:
@@ -8,33 +8,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Install dependencies
+      - name: Download llama.cpp prebuilt binary
         run: |
-          sudo apt-get update
-          sudo apt-get install -y git build-essential cmake wget
+          wget -O llama.tar.gz https://github.com/ggml-org/llama.cpp/releases/latest/download/llama-binaries-linux-x64.tar.gz
+          tar -xzf llama.tar.gz
 
-      - name: Clone llama.cpp
-        run: |
-          git clone https://github.com/ggml-org/llama.cpp.git
+      - name: Cache model
+        uses: actions/cache@v4
+        with:
+          path: model.gguf
+          key: llama-model-qwen25-05b
 
-      - name: Build llama.cpp
+      - name: Download model (if not cached)
         run: |
-          cd llama.cpp
-          cmake -B build
-          cmake --build build -j$(nproc)
-
-      - name: Download model
-        run: |
-          wget -O model.gguf https://huggingface.co/bartowski/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/Qwen2.5-0.5B-Instruct-Q4_K_M.gguf
+          if [ ! -f model.gguf ]; then
+            wget -O model.gguf https://huggingface.co/bartowski/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/Qwen2.5-0.5B-Instruct-Q4_K_M.gguf
+          fi
 
       - name: Run model
         run: |
-          ./llama.cpp/build/bin/llama-cli \
+          ./llama-cli \
             -m model.gguf \
             -p "Hello, respond briefly." \
-            -st \
             -n 32 \
+            -st \
             --temp 0.2 \
             --top-p 0.9 \
-            --repeat-penalty 1.2 \
-            --no-show-timings
+            --repeat-penalty 1.2
