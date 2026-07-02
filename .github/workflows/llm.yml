@@ -1,4 +1,4 @@
-name: Run Tiny LLM (Proper Fast Cache)
+name: Run Tiny LLM (Stable Cached Build)
 
 on:
   workflow_dispatch:
@@ -13,25 +13,24 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y git build-essential cmake wget
 
-      - name: Cache binary
-        id: cache-bin
+      - name: Clone llama.cpp (always)
+        run: |
+          git clone https://github.com/ggml-org/llama.cpp.git
+
+      - name: Restore build cache
         uses: actions/cache@v4
         with:
-          path: llama-cli
-          key: llama-cli-v1
+          path: llama.cpp/build
+          key: llama-build-v2
 
-      - name: Build llama.cpp ONLY if no binary
+      - name: Build (only if needed)
         run: |
-          if [ -f llama-cli ]; then
-            echo "Using cached binary"
-          else
-            echo "Building once..."
-            git clone https://github.com/ggml-org/llama.cpp.git
+          if [ ! -f llama.cpp/build/bin/llama-cli ]; then
             cd llama.cpp
             cmake -B build
             cmake --build build -j$(nproc)
-
-            cp build/bin/llama-cli ../llama-cli
+          else
+            echo "Using cached build (no compile)"
           fi
 
       - name: Cache model
@@ -48,7 +47,7 @@ jobs:
 
       - name: Run model
         run: |
-          ./llama-cli \
+          ./llama.cpp/build/bin/llama-cli \
             -m model.gguf \
             -p "Hello, respond briefly." \
             -n 32 \
